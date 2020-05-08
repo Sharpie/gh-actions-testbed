@@ -1,0 +1,59 @@
+name: PDK Hangs on Windows
+
+on:
+  push:
+    branches: [master]
+    paths-ignore: ['*.md']
+  pull_request:
+    type: [opened, reopened, edited]
+    paths-ignore: ['*.md']
+  repository_dispatch:
+    types: [pdk_hang]
+
+env:
+  PDK_FRONTEND: noninteractive
+
+jobs:
+  linux:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Install PDK
+        run: |
+          curl -O http://apt.puppet.com/puppet-tools-release-bionic.deb
+          sudo dpkg -i puppet-tools-release-bionic.deb
+          sudo apt update
+
+          sudo apt install -y pdk
+      - name: Print PDK version
+        run: |
+          env
+
+          pdk --version
+
+  mac:
+    runs-on: macos-10.15
+    steps:
+      - name: Install PDK
+        run: |
+          brew tap puppetlabs/puppet
+          brew cask install pdk
+
+          export PATH="/opt/puppetlabs/pdk/bin:${PATH}"
+          printf '%s\n' "::set-env name=PATH::${PATH}"
+      - name: Print PDK version
+        run: |
+          env
+
+          pdk --version
+
+  windows:
+    runs-on: windows-2019
+    steps:
+      - name: Install PDK
+        run: |
+          choco install -y pdk
+      - name: Print PDK version
+        run: |
+          Get-ChildItem -Path Env:
+
+          pdk --version
